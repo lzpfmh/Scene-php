@@ -6,8 +6,9 @@
 namespace Scene\Http;
 
 /**
- * Scene\Http\ResponseInterface initializer
+ * Phalcon\Http\Response
  *
+ * Interface for Phalcon\Http\Response
  */
 interface ResponseInterface
 {

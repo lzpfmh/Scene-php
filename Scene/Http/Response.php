@@ -5,24 +5,9 @@
 */
 namespace Scene\Http;
 
-/*
-use \Scene\Http\ResponseInterface;
-use \Scene\Http\Response\Exception;
-use \Scene\Http\Response\HeadersInterface;
-use \Scene\Http\Response\Headers;
-use \Scene\Http\Response\CookiesInterface;
-use \Scene\Mvc\UrlInterface;
-use \Scene\DI\InjectionAwareInterface;
-use \Scene\DiInterface;
-use \Scene\DI;
-use \DateTime;
-use \DateTimeZone;
-*/
-
-
 use \Scene\Di\InjectionAwareInterface;
 use \Scene\DiInterface;
-use \Scene\DI;
+use \Scene\Di;
 use \Scene\Http\Response\Exception;
 use \Scene\Http\Response\HeadersInterface;
 use \Scene\Http\Response\CookiesInterface;
@@ -45,7 +30,6 @@ use \Scene\Mvc\ViewInterface;
  *  $response->send();
  *</code>
  *
- * @see https://github.com/Scene/cScene/blob/1.2.6/ext/http/response.c
  */
 class Response implements ResponseInterface, InjectionAwareInterface
 {

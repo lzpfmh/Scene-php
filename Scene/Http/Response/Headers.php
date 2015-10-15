@@ -5,9 +5,6 @@
 */
 namespace Scene\Http\Response;
 
-use \Scene\Http\Response\HeadersInterface;
-use \Scene\Http\Response\Exception;
-
 /**
  * Scene\Http\Response\Headers
  *

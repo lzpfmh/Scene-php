@@ -8,7 +8,7 @@ namespace Scene\Http\Response;
 /**
  * Scene\Http\Response\HeadersInterface initializer
  *
- * Interface for Phalcon\Http\Response\Headers compatible bags
+ * Interface for Scene\Http\Response\Headers compatible bags
  */
 interface HeadersInterface
 {
