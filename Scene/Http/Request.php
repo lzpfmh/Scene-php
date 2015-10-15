@@ -10,7 +10,6 @@ use \Scene\http\Request\Exception;
 use \Scene\Http\Request\File;
 use \Scene\Di\InjectionAwareInterface;
 use \Scene\DiInterface;
-use \Scene\Di;
 use \Scene\Text;
 
 /**
@@ -88,11 +87,7 @@ class Request implements RequestInterface, InjectionAwareInterface
      */
     public function getDI()
     {
-        $dependencyInjector = $this->_dependencyInjector;
-        if(!is_object($dependencyInjector)) {
-            $dependencyInjector = Di::getDefault();
-        }
-        return $dependencyInjector;
+        return $this->_dependencyInjector;
     }
 
     /**

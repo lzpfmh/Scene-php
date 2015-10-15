@@ -9,7 +9,6 @@ use \Scene\Mvc\Url\Exception;
 use \Scene\Mvc\Url\UrlReplace;
 use \Scene\DI\InjectionAwareInterface;
 use \Scene\DiInterface;
-use \Scene\Di;
 
 /**
  * Scene\Mvc\Url
@@ -81,11 +80,7 @@ class Url implements UrlInterface, InjectionAwareInterface
      */
     public function getDI()
     {
-        $dependencyInjector = $this->_dependencyInjector;
-        if(!is_object($dependencyInjector)) {
-            $dependencyInjector = Di::getDefault();
-        }
-        return $dependencyInjector;
+        return $this->_dependencyInjector;
     }
 
     /**

@@ -7,7 +7,6 @@ namespace Scene\Mvc;
 
 use \Scene\DI\InjectionAwareInterface;
 use \Scene\DiInterface;
-use \Scene\Di;
 use \Scene\Mvc\RouterInterface;
 use \Scene\Mvc\Router\Exception;
 use \Scene\Mvc\Router\Route;
@@ -278,11 +277,7 @@ class Router implements RouterInterface, InjectionAwareInterface, EventsAwareInt
      */
     public function getDI()
     {
-        $dependencyInjector = $this->_dependencyInjector;
-        if(!is_object($dependencyInjector)) {
-            $dependencyInjector = Di::getDefault();
-        }
-        return $dependencyInjector;
+        return $this->_dependencyInjector;
     }
 
     /**

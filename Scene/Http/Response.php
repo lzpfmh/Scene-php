@@ -7,7 +7,6 @@ namespace Scene\Http;
 
 use \Scene\Di\InjectionAwareInterface;
 use \Scene\DiInterface;
-use \Scene\Di;
 use \Scene\Http\ResponseInterface;
 use \Scene\Http\Response\Exception;
 use \Scene\Http\Response\HeadersInterface;
@@ -136,11 +135,7 @@ class Response implements ResponseInterface, InjectionAwareInterface
      */
     public function getDI()
     {
-        $dependencyInjector = $this->_dependencyInjector;
-        if(!is_object($dependencyInjector)) {
-            $dependencyInjector = Di::getDefault();
-        }
-        return $dependencyInjector;
+        return $this->_dependencyInjector;
     }
 
     /**
