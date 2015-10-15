@@ -48,6 +48,7 @@ use \Scene\Mvc\Router\Route;
  */
 class Group implements GroupInterface
 {
+    
     /**
      * Prefix
      *
@@ -198,7 +199,6 @@ class Group implements GroupInterface
      *
      * @param mixed $paths
      * @return \Scene\Mvc\Router\GroupInterface
-     * @throws Exception
      */
     public function setPaths($paths)
     {
@@ -233,7 +233,7 @@ class Group implements GroupInterface
      *</code>
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @param string|null $httpMethods
      * @return \Scene\Mvc\Router\RouteInterface
      */
@@ -246,7 +246,7 @@ class Group implements GroupInterface
      * Adds a route to the router that only match if the HTTP method is GET
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addGet($pattern, $paths = null)
@@ -258,7 +258,7 @@ class Group implements GroupInterface
      * Adds a route to the router that only match if the HTTP method is POST
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPost($pattern, $paths = null)
@@ -270,7 +270,7 @@ class Group implements GroupInterface
      * Adds a route to the router that only match if the HTTP method is PUT
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPut($pattern, $paths = null)
@@ -282,7 +282,7 @@ class Group implements GroupInterface
      * Adds a route to the router that only match if the HTTP method is PATCH
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPatch($pattern, $paths = null)
@@ -294,7 +294,7 @@ class Group implements GroupInterface
      * Adds a route to the router that only match if the HTTP method is DELETE
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addDelete($pattern, $paths = null)
@@ -306,7 +306,7 @@ class Group implements GroupInterface
      * Add a route to the router that only match if the HTTP method is OPTIONS
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addOptions($pattern, $paths = null)
@@ -318,7 +318,7 @@ class Group implements GroupInterface
      * Adds a route to the router that only match if the HTTP method is HEAD
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addHead($pattern, $paths = null)
@@ -340,7 +340,7 @@ class Group implements GroupInterface
      * @param string $patten
      * @param Mixed $paths
      * @param Mixed $httpMethods
-     * @return \Scene\Mvc\Router\Route
+     * @return \Scene\Mvc\Router\RouteInterface
      * @throws Exception
      */
     protected function _addRoute($pattern, $paths = null, $httpMethods = null)

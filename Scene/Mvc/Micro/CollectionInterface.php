@@ -3,14 +3,17 @@
  * Collection Interface
  *
 */
+
 namespace Scene\Mvc\Micro;
 
 /**
- * Scene\Mvc\Micro\CollectionInterface initializer
+ * Scene\Mvc\Micro\CollectionInterface
  *
+ * Interface for Scene\Mvc\Micro\Collection
  */
 interface CollectionInterface
 {
+    
     /**
      * Sets a prefix for all routes added to the collection
      *
@@ -38,7 +41,7 @@ interface CollectionInterface
      *
      * @param mixed $handler
      * @param boolean|null $lazy
-     * @return \Scene\Mvc\Micro\Collection
+     * @return \Scene\Mvc\Micro\CollectionInterface
      */
     public function setHandler($handler, $lazy = false);
 
@@ -69,70 +72,78 @@ interface CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function map($routePattern, $handler);
+    public function map($routePattern, $handler, $name = null);
 
     /**
      * Maps a route to a handler that only matches if the HTTP method is GET
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function get($routePattern, $handler);
+    public function get($routePattern, $handler, $name = null);
 
     /**
      * Maps a route to a handler that only matches if the HTTP method is POST
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function post($routePattern, $handler);
+    public function post($routePattern, $handler, $name = null);
 
     /**
      * Maps a route to a handler that only matches if the HTTP method is PUT
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function put($routePattern, $handler);
+    public function put($routePattern, $handler, $name = null);
 
     /**
      * Maps a route to a handler that only matches if the HTTP method is PATCH
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function patch($routePattern, $handler);
+    public function patch($routePattern, $handler, $name = null);
 
     /**
      * Maps a route to a handler that only matches if the HTTP method is HEAD
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function head($routePattern, $handler);
+    public function head($routePattern, $handler, $name = null);
 
     /**
      * Maps a route to a handler that only matches if the HTTP method is DELETE
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function delete($routePattern, $handler);
+    public function delete($routePattern, $handler, $name = null);
 
     /**
      * Maps a route to a handler that only matches if the HTTP method is OPTIONS
      *
      * @param string $routePattern
      * @param callable $handler
+     * @param string $name
      * @return \Scene\Mvc\Router\RouteInterface
      */
-    public function options($routePattern, $handler);
+    public function options($routePattern, $handler, $name = null);
 }

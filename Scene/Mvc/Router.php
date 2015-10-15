@@ -42,7 +42,7 @@ use \Scene\Events\EventsAwareInterface;
  *</code>
  *
  */
-class Router implements RouterInterface, InjectionAwareInterface
+class Router implements RouterInterface, InjectionAwareInterface, EventsAwareInterface
 {
     /**
      * Dependency Injector
@@ -57,9 +57,9 @@ class Router implements RouterInterface, InjectionAwareInterface
      *
      * @var null|Scene\Events\ManagerInterface
      * @access protected
-    */
-    
+    */ 
     protected $_eventsManager;
+
     /**
      * URI source
      *
@@ -243,9 +243,9 @@ class Router implements RouterInterface, InjectionAwareInterface
              * Two routes are added by default to match /:controller/:action and
              * /:controller/:action/:params
              */
-            $routes[] = new Route('#^/([a-zA-Z0-9\\_\\-]+)[/]{0,1}$#', ['controller' => 1]);
+            $routes[] = new Route('#^/([\\w0-9\\_\\-]+)[/]{0,1}$#u', ['controller' => 1]);
             $routes[] = new Route(
-                '#^/([a-zA-Z0-9\\_\\-]+)/([a-zA-Z0-9\\.\\_]+)(/.*)*$#',
+                '#^/([\\w0-9\\_\\-]+)/([\\w0-9\\.\\_]+)(/.*)*$#u',
                 ['controller' => 1, 'action' => 2, 'params' => 3]
                 );
         }
@@ -289,7 +289,6 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Sets the event manager
      *
      * @param \Scene\Events\ManagerInterface $eventsManager
-     * @throws Exception
      */
     public function setEventsManager($eventsManager)
     {
@@ -313,8 +312,12 @@ class Router implements RouterInterface, InjectionAwareInterface
      */
     public function getRewriteUri()
     {
-        //The developer can change the URI source
+        
+        /*
+         * The developer can change the URI source
+         */
         if (!$this->_uriSource) {
+            
             /**
              * By default use the standard $_SERVER['REQUEST_URI']
              */
@@ -325,6 +328,7 @@ class Router implements RouterInterface, InjectionAwareInterface
                 }
             }
         } else {
+            
             /**
             * Otherwise we use $_GET['url'] to obtain the rewrite information
             */
@@ -513,22 +517,6 @@ class Router implements RouterInterface, InjectionAwareInterface
             "action"=> $this->_defaultAction,
             "params"=> $this->_defaultParams
         ];
-    }
-
-    /**
-     * Removes slashes at the end of a string
-    */
-    private static function sceneRemoveExtraSlashes($str)
-    {
-        if (is_string($str) === false) {
-            return '';
-        }
-
-        if ($str === '/') {
-            return $str;
-        }
-
-        return rtrim($str, '/');
     }
 
     /**
@@ -881,10 +869,12 @@ class Router implements RouterInterface, InjectionAwareInterface
      *
      *<code>
      * $router->add('/about', 'About::index');
+     * $router->add('/about', 'About::index', ['GET', 'POST']);
+     * $router->add('/about', 'About::index', ['GET', 'POST'], Router::POSITION_FIRST);
      *</code>
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @param string|null $httpMethods
      * @return \Scene\Mvc\Router\RouteInterface
      */
@@ -916,7 +906,7 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Adds a route to the router that only match if the HTTP method is GET
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addGet($pattern, $paths = null, $position = Router::POSITION_LAST)
@@ -928,7 +918,7 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Adds a route to the router that only match if the HTTP method is POST
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPost($pattern, $paths = null, $position = Router::POSITION_LAST)
@@ -940,7 +930,7 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Adds a route to the router that only match if the HTTP method is PUT
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPut($pattern, $paths = null, $position = Router::POSITION_LAST)
@@ -952,7 +942,7 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Adds a route to the router that only match if the HTTP method is PATCH
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPatch($pattern, $paths = null, $position = Router::POSITION_LAST)
@@ -964,7 +954,7 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Adds a route to the router that only match if the HTTP method is DELETE
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addDelete($pattern, $paths = null, $position = Router::POSITION_LAST)
@@ -976,7 +966,7 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Add a route to the router that only match if the HTTP method is OPTIONS
      *
      * @param string $pattern
-     * @param string|null|array $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addOptions($pattern, $paths = null, $position = Router::POSITION_LAST)
@@ -988,7 +978,7 @@ class Router implements RouterInterface, InjectionAwareInterface
      * Adds a route to the router that only match if the HTTP method is HEAD
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addHead($pattern, $paths = null, $position = Router::POSITION_LAST)
@@ -1166,16 +1156,12 @@ class Router implements RouterInterface, InjectionAwareInterface
     /**
      * Returns a route object by its id
      *
-     * @param int $id
+     * @param mixed $id
      * @return \Scene\Mvc\Router\RouteInterface|boolean
      * @throws Exception
      */
     public function getRouteById($id)
     {
-        if (!is_integer($id)) {
-            throw new Exception('Invalid parameter type.');
-        }
-
         foreach ($this->_routes as $route) {
             if ($route->getRouteId() === $id) {
                 return $route;
@@ -1214,5 +1200,4 @@ class Router implements RouterInterface, InjectionAwareInterface
     {
         return true;
     }
-
 }

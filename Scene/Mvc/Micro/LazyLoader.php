@@ -15,6 +15,7 @@ use \Scene\Mvc\Micro\Exception;
  */
 class LazyLoader
 {
+    
     /**
      * Handler
      *
@@ -68,7 +69,9 @@ class LazyLoader
             $this->_handler = $handler;
         }
 
-        //Call the handler
+        /**
+         * Call the handler
+         */
         return call_user_func_array([$handler, $method], $arguments);
     }
 }

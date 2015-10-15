@@ -5,13 +5,13 @@
 */
 namespace Scene\Http;
 
+use \Scene\Http\RequestInterface;
 use \Scene\http\Request\Exception;
 use \Scene\Http\Request\File;
 use \Scene\Di\InjectionAwareInterface;
 use \Scene\DiInterface;
 use \Scene\Di;
 use \Scene\Text;
-use Scene\FilterInterface;
 
 /**
  * Scene\Http\Request

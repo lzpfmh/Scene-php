@@ -6,11 +6,13 @@
 namespace Scene\Mvc\Router;
 
 /**
- * Scene\Mvc\Router\RouteInterface initializer
+ * Phalcon\Mvc\Router\RouteInterface
  *
+ * Interface for Phalcon\Mvc\Router\Route
  */
 interface RouteInterface
 {
+    
     /**
      * \Scene\Mvc\Router\Route constructor
      *
@@ -32,6 +34,7 @@ interface RouteInterface
      * Set one or more HTTP methods that constraint the matching of the route
      *
      * @param string|array $httpMethods
+     * @return \Scene\Mvc\Router\RouteInterface
      */
     public function via($httpMethods);
 
@@ -54,6 +57,7 @@ interface RouteInterface
      * Sets the route's name
      *
      * @param string $name
+     * @return \Scene\Mvc\Router\RouteInterface
      */
     public function setName($name);
 
@@ -61,6 +65,7 @@ interface RouteInterface
      * Sets a set of HTTP methods that constraint the matching of the route
      *
      * @param string|array $httpMethods
+     * @return \Scene\Mvc\Router\RouteInterface
      */
     public function setHttpMethods($httpMethods);
 
@@ -91,6 +96,13 @@ interface RouteInterface
      * @return array
      */
     public function getPaths();
+
+    /**
+     * Returns the paths using positions as keys and names as values
+     *
+     * @return array
+     */
+    public function getReversedPaths();
 
     /**
      * Returns the HTTP methods that constraint matching the route

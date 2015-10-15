@@ -6,8 +6,9 @@
 namespace Scene\Mvc;
 
 /**
- * Scene\Mvc\RouterInterface initializer
+ * Scene\Mvc\RouterInterface
  *
+ * Interface for Scene\Mvc\Router
  */
 interface RouterInterface
 {
@@ -50,7 +51,7 @@ interface RouterInterface
      * Adds a route to the router on any HTTP method
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @param string|null $httpMethods
      * @return \Scene\Mvc\Router\RouteInterface
      */
@@ -60,7 +61,7 @@ interface RouterInterface
      * Adds a route to the router that only match if the HTTP method is GET
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addGet($pattern, $paths = null);
@@ -69,7 +70,7 @@ interface RouterInterface
      * Adds a route to the router that only match if the HTTP method is POST
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPost($pattern, $paths = null);
@@ -78,16 +79,25 @@ interface RouterInterface
      * Adds a route to the router that only match if the HTTP method is PUT
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addPut($pattern, $paths = null);
 
     /**
+     * Adds a route to the router that only match if the HTTP method is PATCH
+     *
+     * @param string $pattern
+     * @param mixed $paths
+     * @return \Scene\Mvc\Router\RouteInterface
+     */
+    public function addPatch($pattern, $paths = null);
+
+    /**
      * Adds a route to the router that only match if the HTTP method is DELETE
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addDelete($pattern, $paths = null);
@@ -96,7 +106,7 @@ interface RouterInterface
      * Add a route to the router that only match if the HTTP method is OPTIONS
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addOptions($pattern, $paths = null);
@@ -105,7 +115,7 @@ interface RouterInterface
      * Adds a route to the router that only match if the HTTP method is HEAD
      *
      * @param string $pattern
-     * @param string|array|null $paths
+     * @param mixed $paths
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function addHead($pattern, $paths = null);
@@ -189,7 +199,7 @@ interface RouterInterface
     /**
      * Returns a route object by its id
      *
-     * @param string $id
+     * @param mixed $id
      * @return \Scene\Mvc\Router\RouteInterface
      */
     public function getRouteById($id);

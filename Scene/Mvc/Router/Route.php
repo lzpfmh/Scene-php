@@ -16,6 +16,7 @@ use \Scene\Text;
  */
 class Route implements RouteInterface
 {
+    
     /**
      * Pattern
      *
@@ -87,6 +88,14 @@ class Route implements RouteInterface
      * @access protected
     */
     protected $_beforeMatch;
+
+    /**
+     * Group
+     *
+     * @var null|callback
+     * @access protected
+    */
+    protected $_group;
 
     /**
      * Unique ID
@@ -196,7 +205,7 @@ class Route implements RouteInterface
      *</code>
      *
      * @param string|array $httpMethods
-     * @return \Scene\Mvc\Router\Route
+     * @return \Scene\Mvc\Router\RouteInterface
      * @throws Exception
      */
     public function via($httpMethods)
@@ -235,7 +244,6 @@ class Route implements RouteInterface
         $matches = [];
         $route = '';
 
-        //foreach ($pattern as $cursor => $ch) {
         $patternLength = strlen($pattern);
         for($cursor = 0; $cursor < $patternLength; $cursor++) {
             $ch = $pattern[$cursor];
@@ -259,7 +267,6 @@ class Route implements RouteInterface
                                 $regexp = null;
                                 $item = (string) substr($pattern, $marker, $cursor - $marker);
 
-                                //foreach ($item as $cursorVar => $ch) {
                                 $itemLength = strlen($item);
                                 for($cursorVar = 0; $cursorVar < $itemLength; $cursorVar++) {
                                     $ch = $item[$cursorVar];
@@ -523,7 +530,7 @@ class Route implements RouteInterface
      *</code>
      *
      * @param string $name
-     * @return \Scene\Mvc\Router\Route
+     * @return \Scene\Mvc\Router\RouteInterface
      * @throws Exception
      */
     public function setName($name)
@@ -543,7 +550,7 @@ class Route implements RouteInterface
      * If the callback returns false the route is treaded as not matched
      *
      * @param callback $callback
-     * @return \Scene\Mvc\Router\Route
+     * @return \Scene\Mvc\Router\RouteInterface
      * @throws Exception
      */
     public function beforeMatch($callback)
@@ -560,7 +567,7 @@ class Route implements RouteInterface
     /**
      * Returns the 'before match' callback if any
      *
-     * @return mixed
+     * @return callable
      */
     public function getBeforeMatch()
     {
@@ -570,7 +577,7 @@ class Route implements RouteInterface
     /**
      * Returns the route's id
      *
-     * @return int|null
+     * @return string|null
      */
     public function getRouteId()
     {
@@ -632,7 +639,7 @@ class Route implements RouteInterface
      *</code>
      *
      * @param string|array $httpMethods
-     * @return \Scene\Mvc\Router\Route
+     * @return \Scene\Mvc\Router\RouteInterface
      * @throws Exception
      */
     public function setHttpMethods($httpMethods)
@@ -664,7 +671,7 @@ class Route implements RouteInterface
      *</code>
      *
      * @param string $hostname
-     * @return \Scene\Mvc\Router\Route
+     * @return \Scene\Mvc\Router\RouteInterface
      * @throws Exception
      */
     public function setHostname($hostname)
@@ -692,7 +699,7 @@ class Route implements RouteInterface
      * Sets the group associated with the route
      *
      * @param Scene\Mvc\Router\GroupInterface
-     * @return Scene\Mvc\Router\Router
+     * @return Scene\Mvc\Router\RouteInterface
      */
     public function setGroup($group)
     {
@@ -715,7 +722,7 @@ class Route implements RouteInterface
      *
      * @param string $name
      * @param callable $converter
-     * @return \Scene\Mvc\Router\Route
+     * @return \Scene\Mvc\Router\RouteInterface
      * @throws Exception
      */
     public function convert($name, $converter)

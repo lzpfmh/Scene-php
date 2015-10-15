@@ -40,6 +40,7 @@ use \Scene\Http\ResponseInterface;
  */
 class Micro extends Injectable implements  \ArrayAccess
 {
+    
     /**
      * Dependency Injector
      *
@@ -79,6 +80,14 @@ class Micro extends Injectable implements  \ArrayAccess
      * @access protected
     */
     protected $_notFoundHandler;
+
+    /**
+     * Error-Handler
+     *
+     * @var null|callable
+     * @access protected
+    */
+    protected $_errorHandler;
 
     /**
      * Active Handler
@@ -124,7 +133,6 @@ class Micro extends Injectable implements  \ArrayAccess
      * \Scene\Mvc\Micro constructor
      *
      * @param \Scene\DiInterface|null $dependencyInjector
-     * @throws Exception
      */
     public function __construct($dependencyInjector = null)
     {
@@ -604,7 +612,7 @@ class Micro extends Injectable implements  \ArrayAccess
         }
 
         $dependencyInjector = $this->_dependencyInjector;
-        if (is_object($dependencyInjector)) {
+        if (!is_object($dependencyInjector)) {
             $dependencyInjector = new FactoryDefault();
             $this->_dependencyInjector = $dependencyInjector;
         }
@@ -626,7 +634,7 @@ class Micro extends Injectable implements  \ArrayAccess
         }
 
         $dependencyInjector = $this->_dependencyInjector;
-        if (is_object($dependencyInjector)) {
+        if (!is_object($dependencyInjector)) {
             $dependencyInjector = new FactoryDefault();
             $this->_dependencyInjector = $dependencyInjector;
         }
@@ -648,7 +656,7 @@ class Micro extends Injectable implements  \ArrayAccess
         }
 
         $dependencyInjector = $this->_dependencyInjector;
-        if (is_object($dependencyInjector)) {
+        if (!is_object($dependencyInjector)) {
             $dependencyInjector = new FactoryDefault();
             $this->_dependencyInjector = $dependencyInjector;
         }
@@ -670,7 +678,7 @@ class Micro extends Injectable implements  \ArrayAccess
         }
 
         $dependencyInjector = $this->_dependencyInjector;
-        if (is_object($dependencyInjector)) {
+        if (!is_object($dependencyInjector)) {
             $dependencyInjector = new FactoryDefault();
             $this->_dependencyInjector = $dependencyInjector;
         }
@@ -869,7 +877,7 @@ class Micro extends Injectable implements  \ArrayAccess
                  */
                 $notfoundhandler = $this->_notFoundHandler;
                 if (!is_callable($notfoundhandler)) {
-                    throw new Exception("Not-Found handler is not callable or is not defined");
+                    throw new Exception('Not-Found handler is not callable or is not defined');
                 }
 
                 /**
@@ -1092,10 +1100,6 @@ class Micro extends Injectable implements  \ArrayAccess
      */
     public function offsetUnset($alias)
     {
-        if (is_string($alias) === false) {
-            throw new Exception('Invalid parameter type.');
-        }
-
         return $alias;
     }
 

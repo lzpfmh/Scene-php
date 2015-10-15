@@ -3,20 +3,21 @@
  * Micro Collection
  *
 */
-namespace Phalcon\Mvc\Micro;
 
-use \Phalcon\Mvc\Micro\Exception;
+namespace Scene\Mvc\Micro;
+
+use \Scene\Mvc\Micro\Exception;
 
 /**
- * Phalcon\Mvc\Micro\Collection
+ * Scene\Mvc\Micro\Collection
  *
  * Groups Micro-Mvc handlers as controllers
  *
  *<code>
  *
- * $app = new Phalcon\Mvc\Micro();
+ * $app = new Scene\Mvc\Micro();
  *
- * $collection = new Phalcon\Mvc\Micro\Collection();
+ * $collection = new Scene\Mvc\Micro\Collection();
  *
  * $collection->setHandler(new PostsController());
  *
@@ -29,6 +30,7 @@ use \Phalcon\Mvc\Micro\Exception;
  */
 class Collection implements CollectionInterface
 {
+    
     /**
      * Prefix
      *
@@ -78,7 +80,7 @@ class Collection implements CollectionInterface
      * Sets a prefix for all routes added to the collection
      *
      * @param string $prefix
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function setPrefix($prefix)
@@ -116,8 +118,8 @@ class Collection implements CollectionInterface
      * Sets the main handler
      *
      * @param mixed $handler
-     * @param boolean|null $lazy
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param boolean $lazy
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function setHandler($handler, $lazy = false)
@@ -136,7 +138,7 @@ class Collection implements CollectionInterface
      * Sets if the main handler must be lazy loaded
      *
      * @param boolean $lazy
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function setLazy($lazy)
@@ -175,7 +177,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function map($routePattern, $handler, $name = null)
@@ -194,7 +197,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function get($routePattern, $handler, $name = null)
@@ -213,7 +217,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function post($routePattern, $handler, $name = null)
@@ -232,7 +237,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function put($routePattern, $handler, $name = null)
@@ -251,7 +257,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function patch($routePattern, $handler, $name = null)
@@ -270,7 +277,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function head($routePattern, $handler, $name = null)
@@ -289,7 +297,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function delete($routePattern, $handler, $name = null)
@@ -308,7 +317,8 @@ class Collection implements CollectionInterface
      *
      * @param string $routePattern
      * @param callable $handler
-     * @return \Phalcon\Mvc\Micro\CollectionInterface
+     * @param string $name
+     * @return \Scene\Mvc\Micro\CollectionInterface
      * @throws Exception
      */
     public function options($routePattern, $handler, $name = null)

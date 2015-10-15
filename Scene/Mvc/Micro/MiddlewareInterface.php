@@ -3,14 +3,17 @@
  * Middleware Interface
  *
 */
+
 namespace Scene\Mvc\Micro;
 
 /**
- * Scene\Mvc\Micro\MiddlewareInterface initializer
+ * Scene\Mvc\Micro\MiddlewareInterface
  *
+ * Allows to implement Scene\Mvc\Micro middleware in classes
  */
 interface MiddlewareInterface
 {
+    
     /**
      * Calls the middleware
      *

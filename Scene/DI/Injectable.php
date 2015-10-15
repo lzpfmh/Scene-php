@@ -98,7 +98,6 @@ abstract class Injectable implements InjectionAwareInterface, EventsAwareInterfa
      * Sets the event manager
      *
      * @param \Scene\Events\ManagerInterface $eventsManager
-     * @throws Exception
      */
     public function setEventsManager($eventsManager)
     {
