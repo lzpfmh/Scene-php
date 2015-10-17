@@ -44,7 +44,7 @@ class FactoryDefault extends DI
             //"escaper" =>            new Service("escaper", "Scene\\Escaper", true),
             
             /* Security */
-            //"security" =>           new Service("security", "Scene\\Security", true),
+            "security" =>           new Service("security", "Scene\\Security", true),
             "crypt" =>              new Service("crypt", "Scene\\Crypt", true),
             
             /* Annotations */
