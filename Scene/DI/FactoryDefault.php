@@ -36,7 +36,7 @@ class FactoryDefault extends DI
             
             /* Request/Response */
             "response" =>           new Service("response", "Scene\\Http\\Response", true),
-            //"cookies" =>            new Service("cookies", "Scene\\Http\\Response\\Cookies", true),
+            "cookies" =>            new Service("cookies", "Scene\\Http\\Response\\Cookies", true),
             "request" =>            new Service("request", "Scene\\Http\\Request", true),
             
             /* Filter/Escaper */

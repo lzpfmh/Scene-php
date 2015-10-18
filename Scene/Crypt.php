@@ -82,7 +82,7 @@ class Crypt implements CryptInterface
      * @var null
      * @access protected
     */
-    protected $_key;
+    protected $_key = 'SCENESCENESCENES';
 
     /**
      * Mode
@@ -327,7 +327,7 @@ class Crypt implements CryptInterface
 
             switch ($paddingType) {
                 case self::PADDING_ANSI_X_923:
-                    $last = substr($test, $length - 1, 1);
+                    $last = substr($text, $length - 1, 1);
                     $ord = (int) ord($last);
                     if ($ord <= $blockSize) {
                         $paddingSize = $ord;
@@ -464,7 +464,7 @@ class Crypt implements CryptInterface
             $padded = $text;
         }
 
-        return $iv.mcrypt_encrypt($cipher, $encryptKey, $padded, $mode, $iv);
+        return $iv . mcrypt_encrypt($cipher, $encryptKey, $padded, $mode, $iv);
     }
 
     /**
@@ -512,6 +512,8 @@ class Crypt implements CryptInterface
         }
 
         $decrypted = mcrypt_decrypt($cipher, $decryptKey, substr($text, $ivSize), $mode, substr($text, 0, $ivSize));
+
+        $decrypted = trim($decrypted);
 
         $blockSize = mcrypt_get_block_size($cipher, $mode);
         $paddingType = $this->_padding;
