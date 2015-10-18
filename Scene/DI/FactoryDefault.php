@@ -58,8 +58,8 @@ class FactoryDefault extends DI
             //"tag" =>                new Service("tag", "Scene\\Tag", true),
             
             /* Session */
-            //"session" =>            new Service("session", "Scene\\Session\\Adapter\\Files", true),
-            //"sessionBag" =>         new Service("sessionBag", "Scene\\Session\\Bag"),
+            "session" =>            new Service("session", "Scene\\Session\\Adapter\\Files", true),
+            "sessionBag" =>         new Service("sessionBag", "Scene\\Session\\Bag"),
             
             /* Managers */
             "eventsManager" =>      new Service("eventsManager", "Scene\\Events\\Manager", true),
