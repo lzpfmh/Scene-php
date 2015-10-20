@@ -824,7 +824,7 @@ class Micro extends Injectable implements  \ArrayAccess
                     $eventsManager->fire('micro:afterExecuteRoute', $this);
                 }
 
-                $afterHandlers = $this->_activeHandler;
+                $afterHandlers = $this->_afterHandlers;
                 if (is_array($afterHandlers)) {
 
                     $this->_stopped = false;
@@ -854,7 +854,7 @@ class Micro extends Injectable implements  \ArrayAccess
                         }
 
                         if (!is_callable($after)) {
-                            throw new Exception("'before' handler is not callable");
+                            throw new Exception("'after' handler is not callable");
                         }
 
                         $status = call_user_func($after);

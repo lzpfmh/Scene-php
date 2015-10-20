@@ -187,7 +187,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap(null, $routePattern, $handler);
+        $this->_addMap(null, $routePattern, $handler, $name);
 
         return $this;
     }
@@ -207,7 +207,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap('GET', $routePattern, $handler);
+        $this->_addMap('GET', $routePattern, $handler, $name);
 
         return $this;
     }
@@ -227,7 +227,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap('POST', $routePattern, $handler);
+        $this->_addMap('POST', $routePattern, $handler, $name);
 
         return $this;
     }
@@ -247,7 +247,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap('PUT', $routePattern, $handler);
+        $this->_addMap('PUT', $routePattern, $handler, $name);
 
         return $this;
     }
@@ -267,7 +267,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap('PATCH', $routePattern, $handler);
+        $this->_addMap('PATCH', $routePattern, $handler, $name);
 
         return $this;
     }
@@ -287,7 +287,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap('HEAD', $routePattern, $handler);
+        $this->_addMap('HEAD', $routePattern, $handler, $name);
 
         return $this;
     }
@@ -307,7 +307,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap('DELETE', $routePattern, $handler);
+        $this->_addMap('DELETE', $routePattern, $handler, $name);
 
         return $this;
     }
@@ -327,7 +327,7 @@ class Collection implements CollectionInterface
             throw new Exception('Invalid parameter type.');
         }
 
-        $this->_addMap('OPTIONS', $routePattern, $handler);
+        $this->_addMap('OPTIONS', $routePattern, $handler, $name);
 
         return $this;
     }
