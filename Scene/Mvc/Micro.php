@@ -1112,10 +1112,6 @@ class Micro extends Injectable implements  \ArrayAccess
      */
     public function before($handler)
     {
-        if (!is_callable($handler)) {
-            throw new Exception('Invalid parameter type.');
-        }
-
         $this->_beforeHandlers[] = $handler;
 
         return $this;
@@ -1130,10 +1126,6 @@ class Micro extends Injectable implements  \ArrayAccess
      */
     public function after($handler)
     {
-        if (!is_callable($handler)) {
-            throw new Exception('Invalid parameter type.');
-        }
-
         $this->_afterHandlers[] = $handler;
 
         return $this;
@@ -1148,10 +1140,6 @@ class Micro extends Injectable implements  \ArrayAccess
      */
     public function finish($handler)
     {
-        if (!is_callable($handler)) {
-            throw new Exception('Invalid parameter type.');
-        }
-
         $this->_finishHandlers[] = $handler;
 
         return $this;
