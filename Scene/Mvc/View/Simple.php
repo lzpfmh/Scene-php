@@ -239,6 +239,8 @@ class Simple extends Injectable implements ViewBaseInterface
                         } else {
                             throw new Exception('Invalid template engine registration for extension: ' . $extension);
                         }
+
+                        
                     }
 
                     $engines[$extension] = $engineObject;
@@ -246,8 +248,6 @@ class Simple extends Injectable implements ViewBaseInterface
             }
 
             $this->_engines = $engines;
-        } else {
-            $engines = $this->_engines;
         }
 
         return $engines;

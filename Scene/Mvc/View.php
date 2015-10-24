@@ -2,33 +2,26 @@
 /**
  * View
  *
- * @author Andres Gutierrez <andres@phalconphp.com>
- * @author Eduar Carvajal <eduar@phalconphp.com>
- * @author Wenzel Pünter <wenzel@phelix.me>
- * @version 1.2.6
- * @package Phalcon
 */
-namespace Phalcon\Mvc;
 
-use \Closure;
-use \Phalcon\DI\Injectable;
-use \Phalcon\DI\InjectionAwareInterface;
-use \Phalcon\Events\EventsAwareInterface;
-use \Phalcon\Mvc\ViewInterface;
-use \Phalcon\Mvc\View\Exception;
-use \Phalcon\Mvc\View\Engine\Php;
-use \Phalcon\Cache\BackendInterface;
+namespace Scene\Mvc;
+
+use \Scene\DI\Injectable;
+use \Scene\Mvc\ViewInterface;
+use \Scene\Mvc\View\Exception;
+use \Scene\Mvc\View\Engine\Php as PhpEngine;
+use \Scene\Cache\BackendInterface;
 
 /**
- * Phalcon\Mvc\View
+ * Scene\Mvc\View
  *
- * Phalcon\Mvc\View is a class for working with the "view" portion of the model-view-controller pattern.
+ * Scene\Mvc\View is a class for working with the "view" portion of the model-view-controller pattern.
  * That is, it exists to help keep the view script separate from the model and controller scripts.
  * It provides a system of helpers, output filters, and variable escaping.
  *
  * <code>
  * //Setting views directory
- * $view = new Phalcon\Mvc\View();
+ * $view = new Scene\Mvc\View();
  * $view->setViewsDir('app/views/');
  *
  * $view->start();
@@ -40,51 +33,59 @@ use \Phalcon\Cache\BackendInterface;
  * echo $view->getContent();
  * </code>
  *
- * @see https://github.com/phalcon/cphalcon/blob/1.2.6/ext/mvc/view.c
  */
-class View extends Injectable implements EventsAwareInterface, InjectionAwareInterface, ViewInterface
+class View extends Injectable implements ViewInterface
 {
+    
     /**
-     * Level: Main Layout
+     * Render Level: To the main layout
      *
      * @var int
-    */
+     */
     const LEVEL_MAIN_LAYOUT = 5;
 
     /**
-     * Level: After Template
+     * Render Level: Render to the templates "after"
      *
      * @var int
-    */
+     */
     const LEVEL_AFTER_TEMPLATE = 4;
 
     /**
-     * Level: Layout
+     * Render Level: To the controller layout
      *
      * @var int
-    */
+     */
     const LEVEL_LAYOUT = 3;
 
     /**
-     * Level: Before Template
+     * Render Level: To the templates "before"
      *
      * @var int
-    */
+     */
     const LEVEL_BEFORE_TEMPLATE = 2;
 
     /**
-     * Level: Action View
+     * Render Level: To the action view
      *
      * @var int
-    */
+     */
     const LEVEL_ACTION_VIEW = 1;
 
     /**
-     * Level: No Render
+     * Render Level: No render any view
      *
      * @var int
-    */
+     */
     const LEVEL_NO_RENDER = 0;
+
+    /**
+     * Cache Mode
+     *
+     * @var int
+     */
+    const CACHE_MODE_NONE = 0;
+    const CACHE_MODE_INVERSE = 1;
 
     /**
      * Options
@@ -117,6 +118,14 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * @access protected
     */
     protected $_renderLevel = 5;
+
+    /**
+     * Current Render Level
+     *
+     * @var int
+     * @access protected
+    */
+    protected $_currentRenderLevel = 0;
 
     /**
      * Disabled Levels
@@ -241,7 +250,7 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Cache
      *
-     * @var null|\Phalcon\Cache\BackendInterface
+     * @var null|\Scene\Cache\BackendInterface
      * @access protected
     */
     protected $_cache;
@@ -271,13 +280,13 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     protected $_disabled = false;
 
     /**
-     * \Phalcon\Mvc\View constructor
+     * \Scene\Mvc\View constructor
      *
-     * @param array|null $options
+     * @param array $options
      */
     public function __construct($options = null)
     {
-        if (is_array($options) === true) {
+        if (is_array($options)) {
             $this->_options = $options;
         }
     }
@@ -286,24 +295,27 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * Sets views directory. Depending of your platform, always add a trailing slash or backslash
      *
      * @param string $viewsDir
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setViewsDir($viewsDir)
     {
-        if (is_string($viewsDir) === false) {
+        if (!is_string($viewsDir)) {
             throw new Exception('The views directory must be a string');
         }
 
-        $this->_viewsDir = $viewsDir;
+        if (substr($viewsDir, -1) != DIRECTORY_SEPARATOR) {
+            $viewsDir = $viewsDir . DIRECTORY_SEPARATOR;
+        }
 
+        $this->_viewsDir = $viewsDir;
         return $this;
     }
 
     /**
      * Gets views directory
      *
-     * @return string|null
+     * @return string
      */
     public function getViewsDir()
     {
@@ -318,17 +330,16 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *</code>
      *
      * @param string $layoutsDir
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setLayoutsDir($layoutsDir)
     {
-        if (is_string($layoutsDir) === false) {
+        if (!is_string($layoutsDir)) {
             throw new Exception('Invalid parameter type.');
         }
 
         $this->_layoutsDir = $layoutsDir;
-
         return $this;
     }
 
@@ -350,17 +361,16 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *</code>
      *
      * @param string $partialsDir
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setPartialsDir($partialsDir)
     {
-        if (is_string($partialsDir) === false) {
+        if (!is_string($partialsDir)) {
             throw new Exception('Invalid parameter type.');
         }
 
         $this->_partialsDir = $partialsDir;
-
         return $this;
     }
 
@@ -382,17 +392,26 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * </code>
      *
      * @param string $basePath
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function setBasePath($basePath)
     {
-        if (is_string($basePath) === false) {
+        if (!is_string($basePath)) {
             throw new Exception('Invalid parameter type.');
         }
 
         $this->_basePath = $basePath;
-
         return $this;
+    }
+
+    /**
+     * Gets base path
+     *
+     * @return string
+     */
+    public function getBasePath()
+    {
+        return $this->_basePath;
     }
 
     /**
@@ -404,7 +423,7 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * </code>
      *
      * @param int $level
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setRenderLevel($level)
@@ -414,7 +433,6 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
         }
 
         $this->_renderLevel = $level;
-
         return $this;
     }
 
@@ -427,21 +445,14 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *</code>
      *
      * @param int|array $level
-     * @return \Phalcon\Mvc\View
-     * @throws Exception
+     * @return \Scene\Mvc\View
      */
     public function disableLevel($level)
     {
-        if (is_array($level) === true) {
+        if (is_array($level)) {
             $this->_disabledLevels = $level;
-        } elseif (is_int($level) === true) {
-            if (is_array($this->_disabledLevels) === false) {
-                $this->_disabledLevels = array();
-            }
-
-            $this->_disabledLevels[$level] = false;
         } else {
-            throw new Exception('Invalid parameter type.');
+            $this->_disabledLevels[$level] = true;
         }
 
         return $this;
@@ -456,12 +467,12 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * </code>
      *
      * @param string $viewPath
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setMainView($viewPath)
     {
-        if (is_string($viewPath) === false) {
+        if (!is_string($viewPath)) {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -488,12 +499,12 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * </code>
      *
      * @param string $layout
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setLayout($layout)
     {
-        if (is_string($layout) === false) {
+        if (!is_string($layout)) {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -505,7 +516,7 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Returns the name of the main view
      *
-     * @return string|null
+     * @return string
      */
     public function getLayout()
     {
@@ -516,49 +527,42 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * Appends template before controller layout
      *
      * @param string|array $templateBefore
-     * @return \Phalcon\Mvc\View
-     * @throws Exception
+     * @return \Scene\Mvc\View
      */
     public function setTemplateBefore($templateBefore)
     {
-        if (is_string($templateBefore) === true) {
-            $this->_templatesBefore = array($templateBefore);
-        } elseif (is_array($templateBefore) === true) {
-            $this->_templatesBefore = $templateBefore;
+        if (!is_array($templateBefore)) {
+            $this->_templatesBefore = [$templateBefore];
         } else {
-            throw new Exception('Invalid parameter type.');
+            $this->_templatesBefore = $templateBefore;
         }
 
         return $this;
     }
 
     /**
-     * Resets any template before layouts
+     * Resets any "template before" layouts
      *
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function cleanTemplateBefore()
     {
         $this->_templatesBefore = null;
-
         return $this;
     }
 
     /**
-     * Appends template after controller layout
+     * Appends "template after" controller layout
      *
      * @param string|array $templateAfter
-     * @return \Phalcon\Mvc\View
-     * @throws Exception
+     * @return \Scene\Mvc\View
      */
     public function setTemplateAfter($templateAfter)
     {
-        if (is_string($templateAfter) === true) {
-            $this->_templatesAfter = array($templateAfter);
-        } elseif (is_array($templateAfter) === true) {
-            $this->_templatesAfter = $templateAfter;
+        if (!is_array($templateAfter)) {
+            $this->_templatesAfter = [$templateAfter];
         } else {
-            throw new Exception('Invalid parameter type.');
+            $tgis->_templatesAfter = $templateAfter;
         }
 
         return $this;
@@ -567,12 +571,11 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Resets any template before layouts
      *
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function cleanTemplateAfter()
     {
         $this->_templatesAfter = null;
-
         return $this;
     }
 
@@ -585,21 +588,16 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *
      * @param string $key
      * @param mixed $value
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setParamToView($key, $value)
     {
-        if (is_string($key) === false) {
+        if (!is_string($key)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (is_array($this->_viewParams) === false) {
-            $this->_viewParams = array();
-        }
-
         $this->_viewParams[$key] = $value;
-
         return $this;
     }
 
@@ -611,25 +609,24 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *</code>
      *
      * @param array $params
-     * @param boolean|null $merge
-     * @return \Phalcon\Mvc\View
+     * @param boolean $merge
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
-    public function setVars($params, $merge = null)
+    public function setVars($params, $merge = true)
     {
-        if (is_array($params) === false) {
+        if (!is_array($params)) {
             throw new Exception('The render parameters must be an array');
         }
 
-        if (is_null($merge) === true) {
-            $merge = true;
-        } elseif (is_bool($merge) === false) {
+        if (!is_bool($merge)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        if ($merge === true) {
-            if (is_array($this->_viewParams) === true) {
-                $this->_viewParams = array_merge($this->_viewParams, $params);
+        if ($merge) {
+            $viewParams = $this->_viewParams;
+            if (is_array($viewParams)) {
+                $this->_viewParams = array_merge($viewParams, $params);
             } else {
                 $this->_viewParams = $params;
             }
@@ -649,21 +646,16 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *
      * @param string $key
      * @param mixed $value
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setVar($key, $value)
     {
-        if (is_string($key) === false) {
+        if (!is_string($key)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (is_array($this->_viewParams) === false) {
-            $this->_viewParams = array();
-        }
-
         $this->_viewParams[$key] = $value;
-
         return $this;
     }
 
@@ -676,12 +668,13 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      */
     public function getVar($key)
     {
-        if (is_string($key) === false) {
+        if (!is_string($key)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (isset($this->_viewParams[$key]) === true) {
-            return $this->_viewParams[$key];
+        $params = $this->_viewParams;
+        if (isset($params[$key])) {
+            return $params[$key];
         }
 
         return null;
@@ -710,7 +703,7 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Gets the name of the action rendered
      *
-     * @return string|null
+     * @return string
      */
     public function getActionName()
     {
@@ -720,7 +713,7 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Gets extra parameters of the action rendered
      *
-     * @return array|null
+     * @return array
      */
     public function getParams()
     {
@@ -730,61 +723,86 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Starts rendering process enabling the output buffering
      *
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function start()
-    {
-        $this->_content = null;
+    {       
         ob_start();
-
+        $this->_content = null;
         return $this;
     }
 
     /**
-     * Loads registered template engines, if none is registered it will use \Phalcon\Mvc\View\Engine\Php
+     * Loads registered template engines, if none is registered it will use \Scene\Mvc\View\Engine\Php
      *
      * @return array
      * @throws Exception
      */
     protected function _loadTemplateEngines()
     {
-        //If the engines aren't initialized 'engines' is false
-        if ($this->_engines === false) {
-            $engines = array();
+        
+        /**
+         * If the engines aren't initialized 'engines' is false
+         */
+        $engines = $this->_engines;
+        if ($engines === false) {
 
-            if (is_array($this->_registeredEngines) === false) {
-                //We use Phalcon\Mvc\View\Engine\Php as default
-                $engines['.phtml'] = new Php($this, $this->_dependencyInjector);
+            $dependencyInjector = $this->_dependencyInjector;
+
+            $engines = [];
+
+            $registerEngines = $this->_registeredEngines;
+            if (!is_array($registerEngines)) {
+
+                /**
+                 * We use Scene\Mvc\View\Engine\Php as default
+                 * Use .phtml as extension for the PHP engine
+                 */
+                $engines['.phtml'] = new PhpEngine($this, $dependencyInjector);
+            
             } else {
-                if (is_object($this->_dependencyInjector) === false) {
-                    throw new Exception('A dependency injector container is required to obtain the application services');
+
+                if (!is_object($dependencyInjector)) {
+                    throw new Exception("A dependency injector container is required to obtain the application services");
                 }
 
-                $arguments = array($this, $this->_dependencyInjector);
-                foreach ($this->_registeredEngines as $extension => $engineService) {
-                    if (is_object($engineService) === true) {
-                        //Engine can be a closure
-                        if ($engineService instanceof Closure) {
+                /**
+                 * Arguments for instantiated engines
+                 */
+                $arguments = [$this, $dependencyInjector];
+
+                foreach ($registerEngines as $extension => $engineService) {
+                    
+                    if (is_object($engineService)) {
+
+                        /**
+                         * Engine can be a closure
+                         */
+                        if ($engineService instanceof \Closure) {
                             $engineObject = call_user_func_array($engineService, $arguments);
                         } else {
                             $engineObject = $engineService;
                         }
-                    } elseif (is_string($engineService) === true) {
-                        //Engine can be a string representing a service in the DI
-                        $engineObject = $this->_dependencyInjector->getShared($engineService, $arguments);
                     } else {
-                        throw new Exception('Invalid template engine registration for extension: '.$extension);
+
+                        /**
+                         * Engine can be a string representing a service in the DI
+                         */
+                        if (is_string($engineService)) {
+                            $engineObject = $dependencyInjector->getShared($engineService, $arguments);
+                        } else {
+                            throw new Exception('Invalid template engine registration for extension: ' . $extension);
+                        }
                     }
 
                     $engines[$extension] = $engineObject;
                 }
             }
 
-            $this->_registeredEngines = $engines;
-            $this->_engines = true;
+            $this->_engines = $engines;
         }
 
-        return $this->_registeredEngines;
+        return $engines;
     }
 
     /**
@@ -794,98 +812,129 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * @param string $viewPath
      * @param boolean $silence
      * @param boolean $mustClean
-     * @param \Phalcon\Cache\BackendInterface|null $cache
+     * @param \Scene\Cache\BackendInterface|null $cache
      * @throws Exception
      */
     protected function _engineRender($engines, $viewPath, $silence, $mustClean, $cache = null)
     {
-        if (is_array($engines) === false ||
-            is_string($viewPath) === false ||
-            is_bool($silence) === false ||
-            is_bool($mustClean) === false) {
+        
+        if (!is_string($viewPath) ||
+            !is_bool($silence) ||
+            !is_bool($mustClean)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        $viewsDirPath = $this->_basePath.$this->_viewsDir.$viewPath;
         $notExists = true;
+        $viewDir = $this->_viewsDir;
+        $basePath = $this->_basePath;
+        $viewsDirPath = $basePath . $viewDir . $viewPath;
 
-        if (is_object($cache) === true &&
-            $cache instanceof BackendInterface === true) {
-            if ($this->_renderLevel >= $this->_cacheLevel) {
-                //Check if the cache is started, the first time a cache is started we start the
-                //cache
-                if ($cache->isStarted() === false) {
+        if (is_object($cache)) {
+            
+            $renderLevel = (int) $this->_renderLevel;
+            $cacheLevel = (int) $this->_cacheLevel;
+
+            if ($renderLevel >= $cacheLevel) {
+
+                /**
+                 * Check if the cache is started, the first time a cache is started we start the
+                 * cache
+                 */
+                if ($cache->isStarted() == false) {
+
                     $key = null;
                     $lifetime = null;
 
-                    //Check if the user has defined different options to the default
-                    if (is_array($this->_options) === true) {
-                        if (isset($this->_options['cache']) === true) {
-                            if (is_array($this->_options['cache']) === true) {
-                                if (isset($this->_options['cache']['key']) === true) {
-                                    $key = $this->_options['cache']['key'];
-                                }
+                    $viewOptions = $this->_options;
 
-                                if (isset($this->_options['cache']['lifetime']) === true) {
-                                    $lifetime = $this->_options['cache']['lifetime'];
+                    /**
+                     * Check if the user has defined a different options to the default
+                     */
+                    if (is_array($viewOptions)) {
+                        if (isset($viewOptions['cache'])) {
+                            $cacheOptions = $viewOptions['cache'];
+                            if (is_array($cacheOptions)) {
+                                if (isset($cacheOptions['key'])) {
+                                    $key = $cacheOptions['key'];
+                                }
+                                if (isset($cacheOptions['lifetime'])) {
+                                    $lifetime = $cacheOptions['lifetime'];
                                 }
                             }
                         }
                     }
 
-                    //If a cache key is not set we create one using a md5
-                    if (is_null($key) === true) {
+                    /**
+                     * If a cache key is not set we create one using a md5
+                     */
+                    if ($key === null) {
                         $key = md5($viewPath);
                     }
 
-                    //We start the cache using the key set
+                    /**
+                     * We start the cache using the key set
+                     */
                     $cachedView = $cache->start($key, $lifetime);
-                    if (is_null($cachedView) === false) {
+                    if ($cachedView !== null) {
                         $this->_content = $cachedView;
                         return null;
                     }
                 }
 
-                //This method only returns true if the cache has not expired
-                if ($cache->isFresh() === false) {
+                /**
+                 * This method only returns true if the cache has not expired
+                 */
+                if (!$cache->isFresh()) {
                     return null;
-                }
+                }               
             }
         }
 
-        //Views are rendered in each engine
-        foreach ($engines as $extension => $engine) {
-            $viewEnginePath = $viewsDirPath.$extension;
+        $viewParams = $this->_viewParams;
+        $eventsManager = $this->_eventsManager;
 
-            if (file_exists($viewEnginePath) === true) {
-                //Call beforeRenderView if there is a events manager available
-                if (is_object($this->_eventsManager) === true) {
+        /**
+         * Views are rendered in each engine
+         */
+        foreach ($engines as $entension => $engine) {
+            
+            $viewEnginePath = $viewsDirPath . $entension;
+            if (file_exists($viewEnginePath)) {
+
+                /**
+                 * Call beforeRenderView if there is a events manager available
+                 */
+                if (is_object($eventsManager)) {
                     $this->_activeRenderPath = $viewEnginePath;
                     if ($this->_eventsManager->fire('view:beforeRenderView', $this, $viewEnginePath) === false) {
                         continue;
                     }
                 }
 
-                $engine->render($viewEnginePath, $this->_viewParams, $mustClean);
+                $engine->render($viewEnginePath, $viewParams, $mustClean);
 
+                /**
+                 * Call afterRenderView if there is a events manager available
+                 */
                 $notExists = false;
-                //Call afterRenderView if there is a events manager available
-                if (is_object($this->_eventsManager) === true) {
-                    $this->_eventsManager->fire('view:afterRenderView', $this);
+                if (is_object($eventsManager)) {
+                    $eventsManager->fire('view:afterRenderView', $this);
                 }
-
                 break;
             }
         }
 
         if ($notExists === true) {
-            //Notify about not found views
-            if (is_object($this->_eventsManager) === true) {
+
+            /**
+             * Notify about not found views
+             */
+            if (is_object($eventsManager)) {
                 $this->_activeRenderPath = $viewEnginePath;
-                $this->_eventsManager->fire('view:notFoundView', $this);
+                $eventsManager->fire('view:notFoundView', $this, $viewEnginePath);
             }
 
-            if ($silence === false) {
+            if (!$silence) {
                 throw new Exception("View '".$viewsDirPath."' was not found in the views directory");
             }
         }
@@ -896,25 +945,67 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *
      *<code>
      *$this->view->registerEngines(array(
-     *  ".phtml" => "Phalcon\Mvc\View\Engine\Php",
-     *  ".volt" => "Phalcon\Mvc\View\Engine\Volt",
+     *  ".phtml" => "Scene\Mvc\View\Engine\Php",
+     *  ".volt" => "Scene\Mvc\View\Engine\Volt",
      *  ".mhtml" => "MyCustomEngine"
      *));
      *</code>
      *
      * @param array $engines
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function registerEngines($engines)
     {
-        if (is_array($engines) === false) {
+        if (!is_array($engines)) {
             throw new Exception('Engines to register must be an array');
         }
 
         $this->_registeredEngines = $engines;
-
         return $this;
+    }
+
+    /**
+     * Get Registered Engines
+     *
+     * @return array
+    */
+    public function getRegisterEngines()
+    {
+        return $this->_registeredEngines;
+    }
+
+    /**
+     * Checks whether view exists
+     *
+     * @param string view
+     * @return boolean
+     */
+    public function exists($view)
+    {
+        if (!is_string($view)) {
+            throw new Exception('Invalid parameter type.');
+        }
+        
+        $basePath = $this->_basePath;
+        $viewDir = $this->_viewsDir;
+        $engines = $this->_registeredEngines;
+
+        if (!is_array($engines)) {
+            $engines = [];
+            $engines['.phtml'] = 'Scene\\Mvc\\View\\Engine\\Php';
+            $this->_registeredEngines = $engines;
+        }
+
+        $exists = false;
+        foreach ($engines as $extension => $value) {
+            $exists = (boolean) file_exists($basePath . $viewsDir . $view . $extension);
+            if ($exists) {
+                break;
+            }
+        }
+
+        return $exists;
     }
 
     /**
@@ -929,23 +1020,21 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * @param string $actionName
      * @param array|null $params
      * @return boolean|null
-     * @throws Execption
+     * @return \Scene\Mvc\View|boolean
      */
     public function render($controllerName, $actionName, $params = null)
     {
-        if (is_string($controllerName) === false ||
-            is_string($actionName) === false) {
+        if (!is_string($controllerName) ||
+            !is_string($actionName)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (is_array($params) === false &&
-            is_null($params) === false) {
-            throw new Exception('Invalid parameter type.');
-        }
+        $this->_currentRenderLevel = 0;
 
-        //If the view is disalbed, we simply update the buffer from any output produced in
-        //the controller
-        if ($this->_disabled !== false) {
+        /**
+         * If the view is disabled we simply update the buffer from any output produced in the controller
+         */
+        if ($this->_disabled != false) {
             $this->_content = ob_get_contents();
             return false;
         }
@@ -954,95 +1043,159 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
         $this->_actionName = $actionName;
         $this->_params = $params;
 
-        //Check if there is a layouts directory set
+        /**
+         * Check if there is a layouts directory set
+         */
         $layoutsDir = $this->_layoutsDir;
-        if (empty($layoutsDir) === true) {
+        if (!$layoutsDir) {
             $layoutsDir = 'layouts/';
         }
 
-        //Check if the user has defined a custom layout
-        $layoutName = $this->_layout;
-        if (empty($layoutName) === true) {
+        /**
+         * Check if the user has defined a custom layout
+         */
+        $layout = $this->_layout;
+        if ($layout) {
+            $layoutName = $layout;
+        } else {
             $layoutName = $controllerName;
         }
 
-        //Load the template engines
+        /**
+         * Load the template engines
+         */
         $engines = $this->_loadTemplateEngines();
 
-        //Check if the user has picked a view different that the automatic
-        if (is_null($this->_pickView) === true) {
-            $renderView = $controllerName.'/'.$actionName;
+        /**
+         * Check if the user has picked a view diferent than the automatic
+         */
+        $pickView = $this->_pickView;
+
+        if ($pickView === null) {
+            $renderView = $controllerName . '/' . $actionName;
         } else {
-            //@note better check for array type here!
-            //The 'picked' view is an array, where the first element is the controller and the
-            //second the action
-            $renderView = $this->_pickView[0];
-            if (isset($this->_pickView[1]) === true) {
-                $layoutName = $this->_pickView[1];
+
+            /**
+             * The 'picked' view is an array, where the first element is controller and the second the action
+             */
+            $renderView = $pickView[0];
+            if (isset($pickView[1])) {
+                $layoutName = $pickView[1];
             }
         }
 
-        $cache = null;
-
-        //Start the cache if there is a cache level enabled
-        if ($this->_cacheLevel > 0) {
+        /**
+         * Start the cache if there is a cache level enabled
+         */
+        if ($this->_cacheLevel) {
             $cache = $this->getCache();
+        } else {
+            $cache = null;
         }
 
-        //Call beforeRender if there is an events manager
-        if (is_object($this->_eventsManager) === true) {
+        $eventsManager = $this->_eventsManager;
+
+        /**
+         * Create a virtual symbol table
+         */
+        //create_symbol_table();
+        
+        /**
+         * Call beforeRender if there is an events manager
+         */
+        if (is_object($eventsManager)) {
             if ($this->_eventsManager->fire('view:beforeRender', $this) === false) {
                 return false;
             }
         }
 
-        //Get the current content in the buffer maybe some output from the controller
+        /**
+         * Get the current content in the buffer maybe some output from the controller?
+         */
         $this->_content = ob_get_contents();
 
-        //Disabled levels allow to avoid an specific level of rendering
-        //Render level will tell us when to stop
-        if ($this->_renderLevel > self::LEVEL_NO_RENDER) {
-            //Insert view related to action
-            if ($this->_renderLevel >= self::LEVEL_ACTION_VIEW && isset($this->_disabledLevels[self::LEVEL_ACTION_VIEW]) === false) {
-                $this->_engineRender($engines, $renderView, true, true, $cache);
-            }
+        $mustClean = true;
+        $silence = true;
 
-            //Insert templates before layout
-            if ($this->_renderLevel >= self::LEVEL_BEFORE_TEMPLATE && isset($this->_disabledLevels[self::LEVEL_BEFORE_TEMPLATE]) === false &&
-                is_array($this->_templatesBefore) === true) {
-                //Templates before must be an array
-                foreach ($this->_templatesBefore as $templateBefore) {
-                    $this->_engineRender($engines, $layoutsDir.$templateBefore, false, true, $cache);
+        /**
+         * Disabled levels allow to avoid an specific level of rendering
+         */
+        $disableLevel = $this->_disabledLevels;
+
+        /**
+         * Render level will tell use when to stop
+         */
+        $renderLevel = (int) $this->_renderLevel;
+        if ($renderLevel) {
+
+            /**
+             * Inserts view related to action
+             */
+            if ($renderLevel >= self::LEVEL_ACTION_VIEW) {
+                if (!isset($disableLevel[self::LEVEL_ACTION_VIEW])) {
+                    $this->_currentRenderLevel = self::LEVEL_ACTION_VIEW;
+                    $this->_engineRender($engines, $renderView, $silence, $mustClean, $cache);
                 }
             }
 
-            //Insert controller layout
-            if ($this->_renderLevel >= self::LEVEL_LAYOUT) {
-                if (isset($this->_disabledLevels[self::LEVEL_LAYOUT]) === false) {
-                    $this->_engineRender($engines, $layoutsDir.$layoutName, true, true, $cache);
-                }
-            }
+            /**
+             * Inserts templates before layout
+             */
+            if ($renderLevel >= self::LEVEL_BEFORE_TEMPLATE) {
+                if (!isset($disableLevel[self::LEVEL_BEFORE_TEMPLATE])) {
+                    $this->_currentRenderLevel = self::LEVEL_BEFORE_TEMPLATE;
+                    $templatesBefore = $this->_templatesBefore;
 
-            //Inserts templates after layout
-            if ($this->_renderLevel >= self::LEVEL_AFTER_TEMPLATE &&
-                isset($this->_disabledLevels[self::LEVEL_AFTER_TEMPLATE]) === false) {
-                //Templates after must be an array
-                if (is_array($this->_templatesAfter) === true) {
-                    foreach ($this->_templatesAfter as $templateAfter) {
-                        $this->_engineRender($engines, $layoutsDir.$templateAfter, false, true, $cache);
+                    /**
+                     * Templates before must be an array
+                     */
+                    if (is_array($templatesBefore)) {
+                        $silence = false;
+                        foreach ($templatesBefore as $templateBefore) {
+                            $this->_engineRender($engines, $layoutsDir . $templateBefore, $silence, $mustClean, $cache);
+                        }
+                        $silence = true;
                     }
                 }
             }
 
-            //Inserts main view
-            if ($this->_renderLevel >= self::LEVEL_MAIN_LAYOUT && isset($this->_disabledLevels[self::LEVEL_MAIN_LAYOUT]) === false) {
-                $this->_engineRender($engines, $this->_mainView, true, true, $cache);
+            /**
+             * Inserts controller layout
+             */
+            if ($renderLevel >= self::LEVEL_LAYOUT) {
+                if (!isset($disableLevel[self::LEVEL_LAYOUT])) {
+                    $this->_currentRenderLevel = self::LEVEL_LAYOUT;
+                    $this->_engineRender($engines, $layoutsDir . $layoutName, $silence, $mustClean, $cache);
+                }
             }
 
-            //Store the data in the cache
-            if (is_object($cache) === true) {
-                if ($cache->isStarted() === true) {
-                    if ($cache->isFresh() === true) {
+            /**
+             * Inserts templates after layout
+             */
+            if ($renderLevel >= self::LEVEL_AFTER_TEMPLATE) {
+                if (isset($disableLevel[self::LEVEL_AFTER_TEMPLATE])) {
+                    $this->_currentRenderLevel = self::LEVEL_AFTER_TEMPLATE;
+
+                    /**
+                     * Templates after must be an array
+                     */
+                    $templatesAfter = $this->_templatesAfter;
+                    if (is_array($templatesAfter)) {
+                        $silence = false;
+                        foreach ($templatesAfter as $templateAfter) {
+                            $this->_engineRender($engines, $layoutsDir . $templatesAfter, $silence, $mustClean, $cache);
+                        }
+                        $silence = true;
+                    }
+                }
+            }
+
+            /**
+             * Store the data in the cache
+             */
+            if (is_object($cache)) {
+                if ($cache->isStarted() == true) {
+                    if ($cache->isFresh() == true) {
                         $cache->save();
                     } else {
                         $cache->stop();
@@ -1053,19 +1206,21 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
             }
         }
 
-        //Call afterRender event
-        if (is_object($this->_eventsManager) === true) {
-            $this->_eventsManager->fire('view:afterRender', $this);
+        /**
+         * Call afterRender event
+         */
+        if (is_object($eventsManager)) {
+            $eventsManager->fire('view:afterRender', $this);
         }
 
-        return null;
+        return $this;
     }
 
     /**
      * Choose a different view to render instead of last-controller/last-action
      *
      * <code>
-     * class ProductsController extends \Phalcon\Mvc\Controller
+     * class ProductsController extends \Scene\Mvc\Controller
      * {
      *
      *    public function saveAction()
@@ -1080,29 +1235,57 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      * </code>
      *
      * @param string|array $renderView
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function pick($renderView)
     {
-        if (is_array($renderView) === true) {
+        if (is_array($renderView)) {
             $pickView = $renderView;
         } else {
+            
             $layout = null;
             if (strpos($renderView, '/') !== false) {
                 $parts = explode('/', $renderView);
                 $layout = $parts[0];
             }
 
-            $pickView = $renderView;
-            if (is_null($layout) === false) {
+            $pickView = [$renderView];
+            if (!is_null($layout)) {
                 $pickView[] = $layout;
             }
         }
 
-        $this->_pickView;
-
+        $this->_pickView = $pickView;;
         return $this;
+    }
+
+    /**
+     * Renders a partial view
+     *
+     * <code>
+     *  //Retrieve the contents of a partial
+     *  echo $this->getPartial('shared/footer');
+     * </code>
+     *
+     * <code>
+     *  //Retrieve the contents of a partial with arguments
+     *  echo $this->getPartial('shared/footer', array('content' => $html));
+     * </code>
+     *
+     * @param string partialPath
+     * @param array params
+     * @return string
+     */
+    public function getPartial($partialPath, $params = null)
+    {
+        if (!is_string($partialPath)) {
+            throw new Exception('Invalid parameter type.');
+        }
+
+        ob_start();
+        $this->partial($partialPath, $params);
+        return ob_get_clean();
     }
 
     /**
@@ -1124,36 +1307,45 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      */
     public function partial($partialPath, $params = null)
     {
-        if (is_string($partialPath) === false) {
+        if (!is_string($partialPath)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        //If the developer passes an array of variables we create a new virtual symbol table
-        if (is_array($params) === true) {
+        /**
+         * If the developer pass an array of variables we create a new virtual symbol table
+         */
+        if (is_array($params)) {
+
+            /**
+             * Merge or assign the new params as parameters
+             */
             $viewParams = $this->_viewParams;
-            //Merge or assign the new params as parameters
-            if (is_array($viewParams) === true) {
-                $params = array_merge($viewParams, $params);
+            if (is_array($viewParams)) {
+                $this->_viewParams = array_merge($viewParams, $params);
+            } else {
+                $this->_viewParams = $params;
             }
 
-            //Update the parameters with the name ones
-            $this->_viewParams = $params;
-        } elseif (is_null($params) === false) {
-            throw new Exception('Invalid parameter type.');
+            /**
+             * Create a virtual symbol table
+             */
+            //create_symbol_table();
         }
 
-        //Partials are looked up under the partials directory
-        $realPath = $this->_partialsDir.$partialPath;
+        /**
+         * Partials are looked up under the partials directory
+         * We need to check if the engines are loaded first, this method could be called outside of 'render'
+         * Call engine render, this checks in every registered engine for the partial
+         */
+        $this->_engineRender($this->_loadTemplateEngines(), $this->_partialsDir . $partialPath, false, false);
 
-        //We need to check if the engines are loaded first, this method could be called
-        //outside of 'render'
-        $engines = $this->_loadTemplateEngines();
-
-        //Call engine render, this checks in every registered engine for the partial
-        $this->_engineRender($engines, $realPath, false, false, false);
-
-        //Now we need to restore the original view parameters
-        if (isset($viewParams) === true) {
+        /**
+         * Now we need to restore the original view parameters
+         */
+        if (is_array($params)) {
+            /**
+             * Restore the original view params
+             */
             $this->_viewParams = $viewParams;
         }
     }
@@ -1167,93 +1359,105 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *
      * @param string $controllerName
      * @param string $actionName
-     * @param array|null $params
+     * @param array $params
      * @param mixed $configCallback
      * @return string
      * @throws Exception
      */
     public function getRender($controllerName, $actionName, $params = null, $configCallback = null)
     {
-        if (is_string($controllerName) === false ||
-            is_string($actionName) === false) {
+        if (!is_string($controllerName) ||
+            !is_string($actionName)) {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (is_array($params) === false &&
-            is_null($params) === false) {
-            throw new Exception('Invalid parameter type.');
-        }
-
-        //We must clone the current view to keep the old state
+        /**
+         * We must to clone the current view to keep the old state
+         */
         $view = clone $this;
 
-        //The component must be reset to its defaults
+        /**
+         * The component must be reset to its defaults
+         */
         $view->reset();
 
-        //Set the render variables
-        if (is_array($params) === true) {
+        /**
+         * Set the render variables
+         */
+        if (is_array($params)) {
             $view->setVars($params);
         }
 
-        //Perform extra configuration over the cloned object
-        if (is_object($configCallback) === true) {
-            $status = call_user_func_array($configCallback, array($view));
+        /**
+         * Perform extra configurations over the cloned object
+         */
+        if (is_object($configCallback)) {
+            call_user_func_array($configCallback, [$view]);
         }
 
-        //Start the output buffering
+        /**
+         * Start the output buffering
+         */
         $view->start();
 
-        //Perform the render passing only the controller and action
+        /**
+         * Perform the render passing only the controller and action
+         */
         $view->render($controllerName, $actionName);
 
-        //Stop the output buffering
+        /**
+         * Stop the output buffering
+         */
         ob_end_clean();
 
-        //Get the passed content
+        /**
+         * Get the processed content
+         */
         return $view->getContent();
     }
 
     /**
      * Finishes the render process by stopping the output buffering
      *
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function finish()
     {
         ob_end_clean();
-
         return $this;
     }
 
     /**
-     * Create a \Phalcon\Cache based on the internal cache options
+     * Create a \Scene\Cache based on the internal cache options
      *
-     * @return \Phalcon\Cache\BackendInterface
+     * @return \Scene\Cache\BackendInterface
      * @throws Exception
      */
     protected function _createCache()
     {
-        if (is_object($this->_dependencyInjector) === false) {
+        
+        $dependencyInjector = $this->_dependencyInjector;
+        if (!is_object($dependencyInjector)) {
             throw new Exception('A dependency injector container is required to obtain the view cache services');
         }
 
         $cacheService = 'viewCache';
 
-        if (is_array($this->_options) === true) {
-            if (isset($this->_options['cache']) === true) {
+        $viewOptions = $this->_options;
+        if (is_array($viewOptions)) {
+            if (isset($viewOptions['cache'])) {
                 $cacheOptions = $this->_options['cache'];
-                if (is_array($cacheOptions) === true) {
-                    if (isset($cacheOptions['service']) === true) {
-                        $cacheService = $cacheOptions['service'];
-                    }
+                if (isset($cacheOptions['service'])) {
+                     $cacheService = $cacheOptions['service'];
                 }
             }
         }
 
-        //@note $cacheService can be null
-        //The injected service must be an object
-        $viewCache = $this->_dependencyInjector->getShared($cacheService);
-        if (is_object($viewCache) === false) {
+        /**
+         * The injected service must be an object
+         */
+        $viewCache = $dependencyInjector->getShared($cacheService);
+        if (!is_object($viewCache)) {
             throw new Exception('The injected caching service is invalid');
         }
 
@@ -1267,25 +1471,28 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      */
     public function isCaching()
     {
-        return (0 < $this->_cacheLevel ? true : false);
+        return $this->_cacheLevel > 0;
     }
 
     /**
      * Returns the cache instance used to cache
      *
-     * @return \Phalcon\Cache\BackendInterface
+     * @return \Scene\Cache\BackendInterface
      */
     public function getCache()
     {
-        if (isset($this->_cache) === true) {
-            if (is_object($this->_cache) === false) {
-                $this->_cache = $this->_createCache();
+        $cache = $this->_cache;
+        if ($cache) {
+            if (!is_object($cache)) {
+                $cache = $this->_createCache();
+                $this->_cache = $cache;
             }
         } else {
-            $this->_cache = $this->_createCache();
+            $cache = $this->_createCache();
+            $this->_cache = $cache;
         }
 
-        return $this->_cache;
+        return $cache;
     }
 
     /**
@@ -1295,47 +1502,54 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *  $this->view->cache(array('key' => 'my-key', 'lifetime' => 86400));
      *</code>
      *
-     * @param boolean|array|null $options
-     * @return \Phalcon\Mvc\View
+     * @param boolean|array $options
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
-    public function cache($options = null)
+    public function cache($options = true)
     {
-        if (is_null($options) === true) {
-            $options = true;
-        }
-
-        if (is_array($options) === true) {
+        
+        if (is_array($options)) {
+            
             $viewOptions = $this->_options;
-            if (is_array($viewOptions) === false) {
-                $viewOptions = array();
+            if (!is_array($viewOptions)) {
+                $viewOptions = [];
             }
 
-            //Get the default cache options
-            if (isset($viewOptions['cache']) === true) {
+            /**
+             * Get the default cache options
+             */
+            if (isset($viewOptions['cache'])) {
                 $cacheOptions = $viewOptions['cache'];
             } else {
-                $cacheOptions = array();
+                $cacheOptions = [];
             }
 
             foreach ($options as $key => $value) {
                 $cacheOptions[$key] = $value;
             }
 
-            //Check if the user has defined a default cache level or uses 5 as default
-            if (isset($cacheOptions['level']) === true) {
+            /**
+             * Check if the user has defined a default cache level or use self::LEVEL_MAIN_LAYOUT as default
+             */
+            if (isset($cacheOptions['level'])) {
                 $this->_cacheLevel = $cacheOptions['level'];
             } else {
-                $this->_cacheLevel = 5;
+                $this->_cacheLevel = self::LEVEL_MAIN_LAYOUT;
             }
 
             $viewOptions['cache'] = $cacheOptions;
             $this->_options = $viewOptions;
-        } elseif (is_bool($options) === true) {
-            //If 'options' isn't an arary we enable the cache with the default options
-            $this->_cacheLevel = ($options === true ? 5 : 0);
         } else {
-            throw new Exception('Invalid parameter type.');
+
+            /**
+             * If 'options' isn't an array we enable the cache with the default options
+             */
+            if ($options) {
+                $this->_cacheLevel = self::LEVEL_MAIN_LAYOUT;
+            } else {
+                $this->_cacheLevel = self::LEVEL_NO_RENDER;
+            }
         }
 
         return $this;
@@ -1349,17 +1563,16 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      *</code>
      *
      * @param string $content
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      * @throws Exception
      */
     public function setContent($content)
     {
-        if (is_string($content) === false) {
+        if (!is_string($content)) {
             throw new Exception('Content must be a string');
         }
 
         $this->_content = $content;
-
         return $this;
     }
 
@@ -1376,7 +1589,7 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Returns the path of the view that is currently rendered
      *
-     * @return string|null
+     * @return string
      */
     public function getActiveRenderPath()
     {
@@ -1384,21 +1597,40 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     }
 
     /**
+     * Get Render Level
+     *
+     * @return int
+     */
+    public function getRenderLevel()
+    {
+        return $this->_renderLevel;
+    }
+
+    /**
+     * Get Current Render Level
+     *
+     * @return int
+     */
+    public function getCurrentRenderLevel()
+    {
+        return $this->_currentRenderLevel;
+    }
+
+    /**
      * Disables the auto-rendering process
      *
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function disable()
     {
         $this->_disabled = true;
-
         return $this;
     }
 
     /**
      * Enables the auto-rendering process
      *
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function enable()
     {
@@ -1409,15 +1641,15 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
     /**
      * Resets the view component to its factory default values
      *
-     * @return \Phalcon\Mvc\View
+     * @return \Scene\Mvc\View
      */
     public function reset()
     {
         $this->_disabled = false;
         $this->_engines = false;
         $this->_cache = null;
-        $this->_renderLevel = 5;
-        $this->_cacheLevel = 0;
+        $this->_renderLevel = self::LEVEL_MAIN_LAYOUT;
+        $this->_cacheLevel = self::LEVEL_NO_RENDER;
         $this->_content = null;
         $this->_templatesBefore = null;
         $this->_templatesAfter = null;
@@ -1438,12 +1670,8 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      */
     public function __set($key, $value)
     {
-        if (is_string($key) === false) {
+        if (!is_string($key)) {
             throw new Exception('Invalid parameter type.');
-        }
-
-        if (is_array($this->_viewParams) === false) {
-            $this->_viewParams = array();
         }
 
         $this->_viewParams[$key] = $value;
@@ -1462,14 +1690,36 @@ class View extends Injectable implements EventsAwareInterface, InjectionAwareInt
      */
     public function __get($key)
     {
-        if (is_string($key) === false) {
+        if (!is_string($key)) {
             throw new Exception('Invalid parameter type.');
         }
 
         if (isset($this->_viewParams[$key]) === true) {
             return $this->_viewParams[$key];
         }
-
         return null;
+    }
+
+    /**
+     * Whether automatic rendering is enabled
+     */
+    public function isDisabled()
+    {
+        return $this->_disabled;
+    }
+
+    /**
+     * Magic method to retrieve if a variable is set in the view
+     *
+     *<code>
+     *  echo isset($this->view->products);
+     *</code>
+     *
+     * @param string key
+     * @return boolean
+     */
+    public function __isset($key)
+    {
+        return isset($this->_viewParams[$key]);
     }
 }
