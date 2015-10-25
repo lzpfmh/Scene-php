@@ -27,7 +27,7 @@ class FactoryDefault extends DI
         $this->_services = [
             /* Base */ 
             "router" =>             new Service("router", "Scene\\Mvc\\Router", true),
-            //"dispatcher" =>         new Service("dispatcher", "Scene\\Mvc\\Dispatcher", true),
+            "dispatcher" =>         new Service("dispatcher", "Scene\\Mvc\\Dispatcher", true),
             "url" =>                new Service("url", "Scene\\Mvc\\Url", true),
             
             /* Models */
